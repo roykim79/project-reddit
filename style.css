@@ -1,0 +1,33 @@
+header {
+  margin-bottom: 20px;
+}
+
+input {
+  margin-bottom: 10px;
+}
+
+.add-comment {
+  margin-top: 20px;
+}
+
+.glyphicon {
+  color: #337ab7;
+}
+
+.glyphicon:hover {
+  cursor: pointer;
+}
+
+.post {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+
+.comments {
+  padding: 20px;
+}
+
+.remove-post,
+.toggle-post-comments {
+  margin-left: 10px;
+}
