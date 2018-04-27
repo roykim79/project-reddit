@@ -33,12 +33,10 @@ input {
   margin-top: 10px;
   padding: 10px 20px;
 }
-.post-content,
-.post-comment-content {
+.post-content, .post-comment-content {
   font-size: 1.2em;
 }
 
-.remove-post,
-.toggle-post-comments {
+.edit-post, .remove-post, .toggle-post-comments {
   margin-left: 5px;
 }

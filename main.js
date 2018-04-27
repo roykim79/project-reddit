@@ -16,11 +16,18 @@ var createPost = function(content, author) {
   var postTemplate =
     '<div class="row post">' +
       '<div class="col-md-12">' +
-        '<p class="post-content">' +content + '</p>' +
+        '<p class="post-content">' + content + '</p>' +
         '<div class="post-details">' +
           '<span class="post-author">Posted By: <strong>' + author + '</strong></span>' +
           '<span class="remove-post"><a href="#">remove</a></span>' +
+          '<span class="edit-post"><a href="#">edit</a></span>' +
           '<span class="toggle-post-comments"><a href="#">comments</a></span>' +
+        '</div>' +
+        '<div class="edit-area hide">' +
+          '<form action="#">' +
+            '<input class="form-control edit-content" type="text">' +
+            '<button class="btn btn-primary">Update</button>' +
+          '</form>' +
         '</div>' +
         '<div class="comments hide">' +
           '<div class="post-comments">' +
@@ -38,9 +45,11 @@ var createPost = function(content, author) {
 
   var $post = $(postTemplate);
 
-  $post.find('button').click(addComment);
+  $post.find('.add-comment button').click(addComment);
+  $post.find('.edit-post a').click(toggleEditArea);
   $post.find('.toggle-post-comments a').click(toggleComments);
   $post.find('.remove-post a').click(removePost);
+  $post.find('.edit-area button').click(editPost);
 
   return $post;
 };
@@ -60,11 +69,31 @@ var createComment = function(content, author) {
   return $comment;
 };
 
-var toggleComments = function() {
+var editPost = function() {
   var $this = $(this);
-  var $commentsContainer = $this.closest('.post-details').siblings('.comments');
+  var updatedPost = $this.siblings('input').val();
+  var $postContent = $this.closest('.edit-area').siblings('.post-content');
+  var $editArea = $this.closest('.edit-area');
+
+  $postContent.empty();
+  $postContent.text(updatedPost);
+
+  $editArea.addClass('hide');
+};
+
+var toggleComments = function() {
+  var $commentsContainer = $(this).closest('.post-details').siblings('.comments');
 
   $commentsContainer.toggleClass('hide');
+};
+
+var toggleEditArea = function() {
+  var $editArea = $(this).closest('.post-details').siblings('.edit-area');
+  var postContent = $editArea.siblings('.post-content').html();
+  var $editInput = $editArea.find('.edit-content');
+
+  $editArea.toggleClass('hide');
+  $editInput.val(postContent);
 };
 
 var removePost = function() {
