@@ -78,7 +78,7 @@ var removeComment = function() {
 var $postsContainer = $('.posts');
 
 // when user clicks Post, create post template and add to posts
-$('#new-post-post').on('click', function() {
+$('#new-post-post').click('click', function() {
   var $postContentInput = $('#new-post-content');
   var $postAuthorInput = $('#new-post-author');
 
