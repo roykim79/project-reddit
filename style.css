@@ -40,3 +40,7 @@ input {
 .edit-post, .remove-post, .toggle-post-comments {
   margin-left: 5px;
 }
+
+.post-view .post-content {
+  font-size: 3em;
+}

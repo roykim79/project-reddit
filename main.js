@@ -1,118 +1,190 @@
-var addComment = function() {
-  var $this = $(this);
-  var $commentsContainer = $this.closest('.comments').find('.post-comments');
-  var $commentContentInput = $this.siblings('.comment-content');
-  var $commentAuthorInput = $this.siblings('.comment-author');
+var data = { posts: [] };
+// keep track of which post is being viewed in the post-view
+var highlightedPostIndex = null;
+var STORAGE_ID = 'project-reddit';
+
+var saveToLocalStorage = function () {
+  localStorage.setItem(STORAGE_ID, JSON.stringify(data));
+};
+
+var getFromLocalStorage = function () {
+  return JSON.parse(localStorage.getItem(STORAGE_ID) || '[]');
+};
+
+// push new comment to comments array of the post cooresponding to postIndex
+var addComment = function(el) {
+  var $commentContentInput = el.siblings('.comment-content');
+  var $commentAuthorInput = el.siblings('.comment-author');
   var content = $commentContentInput.val();
   var author = $commentAuthorInput.val();
+  var postIndex = el.closest('.post').data('post-index');
 
-  $commentsContainer.append(createComment(content, author));
+  data.posts[postIndex].comments.push({
+    content: $commentContentInput.val(),
+    author: $commentAuthorInput.val()
+  });
 
   $commentContentInput.val('');
   $commentAuthorInput.val('');
 };
 
-var createPost = function(content, author) {
-  var postTemplate =
-    '<div class="row post">' +
-      '<div class="col-md-12">' +
-        '<p class="post-content">' + content + '</p>' +
-        '<div class="post-details">' +
-          '<span class="post-author">Posted By: <strong>' + author + '</strong></span>' +
-          '<span class="remove-post"><a href="#">remove</a></span>' +
-          '<span class="edit-post"><a href="#">edit</a></span>' +
-          '<span class="toggle-post-comments"><a href="#">comments</a></span>' +
-        '</div>' +
-        '<div class="edit-area hide">' +
-          '<form action="#">' +
-            '<input class="form-control edit-content" type="text">' +
-            '<button class="btn btn-primary">Update</button>' +
-          '</form>' +
-        '</div>' +
-        '<div class="comments hide">' +
-          '<div class="post-comments">' +
-          '</div>' +
-          '<div class="add-comment">' +
-            '<form action="#">' +
-              '<input class="form-control comment-content" type="text" placeholder="Comment Text">' +
-              '<input class="form-control comment-author" type="text" placeholder="Name">' +
-              '<button class="btn btn-primary">Post Comment</button>' +
-            '</form>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+var editPost = function(el) {
+  var updatedPost = el.siblings('input').val();
+  var postIndex = el.closest('.post').data('post-index');
+  var $editArea = el.closest('.edit-area');
 
-  var $post = $(postTemplate);
-
-  $post.find('.add-comment button').click(addComment);
-  $post.find('.edit-post a').click(toggleEditArea);
-  $post.find('.toggle-post-comments a').click(toggleComments);
-  $post.find('.remove-post a').click(removePost);
-  $post.find('.edit-area button').click(editPost);
-
-  return $post;
+  data.posts[postIndex].content = updatedPost;
 };
 
-var createComment = function(content, author) {
-  var commentTemplate =
-    '<div class="post-comment">' +
-      '<span class="post-comment-content">' + content + '</span>' +
-      '<span class="post-comment-author"> - <strong>' + author + '</strong></span>' +
-      '<span class="glyphicon glyphicon-remove"></span>' +
-    '</div>';
-
-  var $comment = $(commentTemplate);
-
-  $comment.find('.glyphicon-remove').click(removeComment);
-
-  return $comment;
-};
-
-var editPost = function() {
-  var $this = $(this);
-  var updatedPost = $this.siblings('input').val();
-  var $postContent = $this.closest('.edit-area').siblings('.post-content');
-  var $editArea = $this.closest('.edit-area');
-
-  $postContent.empty();
-  $postContent.text(updatedPost);
-
-  $editArea.addClass('hide');
-};
-
-var toggleComments = function() {
-  var $commentsContainer = $(this).closest('.post-details').siblings('.comments');
+var toggleComments = function(el) {
+  var $commentsContainer = el.closest('.post-details').siblings('.comments');
 
   $commentsContainer.toggleClass('hide');
 };
 
-var toggleEditArea = function() {
-  var $editArea = $(this).closest('.post-details').siblings('.edit-area');
+var toggleEditArea = function(el) {
+  var $editArea = el.closest('.post-details').siblings('.edit-area');
   var postContent = $editArea.siblings('.post-content').html();
   var $editInput = $editArea.find('.edit-content');
 
   $editArea.toggleClass('hide');
-  $editInput.val(postContent);
 };
 
-var removePost = function() {
-  $(this).closest('.post').remove();
+var toggleViews = function() {
+  $('.posts-view').toggleClass('hide');
+  $('.post-view').toggleClass('hide');
 };
 
-var removeComment = function() {
-  $(this).closest('.post-comment').remove();
+var removePost = function(el) {
+  var postIndex = el.closest('.post').data('post-index');
+
+  data.posts.splice(postIndex, 1);
+};
+
+var removeComment = function(el) {
+  var postIndex = el.closest('.post').data('post-index');
+  var commentIndex = el.closest('.post-comment').data('comment-index');
+
+  data.posts[postIndex].comments.splice(commentIndex, 1);
+};
+
+var updatePostView = function(postIndex) {
+  var commentsSource = $('#comments-template').html();
+  var commentsTemplate = Handlebars.compile(commentsSource);
+  var $commentsContainer = $('.post-view .post-comments');
+  var commentsData = {comments: data.posts[postIndex].comments};
+  var newHTML = commentsTemplate(commentsData);
+  var $postViewPostContent = $('.post-view .post-content');
+
+  $postViewPostContent.empty().append(data.posts[postIndex].content);
+  $commentsContainer.empty().append(newHTML);
+};
+
+var updatePostsView = function() {
+  var postSource = $('#post-template').html();
+  var postTemplate = Handlebars.compile(postSource);
+  var $postsContainer = $('.posts');
+  var newHTML = postTemplate(data);
+
+  $postsContainer.empty();
+
+  $postsContainer.append(newHTML);
+
+  saveToLocalStorage();
 };
 
 var $postsContainer = $('.posts');
+var $postView = $('.post-view');
 
-// when user clicks Post, create post template and add to posts
+// when user clicks Post, push new post to data.posts
 $('#new-post-post').click('click', function() {
   var $postContentInput = $('#new-post-content');
   var $postAuthorInput = $('#new-post-author');
 
-  $postsContainer.append(createPost($postContentInput.val(), $postAuthorInput.val()));
+  data.posts.push({
+    content: $postContentInput.val(),
+    author: $postAuthorInput.val(),
+    comments: []
+  });
+
+  updatePostsView();
 
   $postContentInput.val('');
   $postAuthorInput.val('');
+});
+
+// toggle comments when user clicks on toggle-post-comments link
+$postsContainer.on('click', '.toggle-post-comments a', function() {
+  toggleComments($(this));
+});
+
+$postsContainer.on('click', '.edit-post a', function() {
+  toggleEditArea($(this));
+});
+
+$postsContainer.on('click', '.add-comment button', function() {
+  addComment($(this));
+  updatePostsView();
+});
+
+$postsContainer.on('click', '.glyphicon-remove', function() {
+  removeComment($(this));
+  updatePostsView();
+});
+
+$postsContainer.on('click', '.remove-post a', function() {
+  removePost($(this));
+  updatePostsView();
+});
+
+$postsContainer.on('click', '.edit-area button', function() {
+  editPost($(this));
+  toggleEditArea($(this));
+  updatePostsView();
+});
+
+// view selected post in 'another' view using data-post-index
+$postsContainer.on('click', '.post-content', function() {
+  var postIndex = $(this).closest('.post').data('post-index');
+
+  highlightedPostIndex = postIndex
+
+  toggleViews();
+  updatePostView(postIndex);
+});
+
+// remove a comment from the post-view
+$postView.on('click', '.glyphicon-remove', function() {
+  var commentsIndex = $(this).closest('.post-comment').data('comment-index');
+
+  data.posts[highlightedPostIndex].comments.splice(commentsIndex, 1);
+
+  updatePostsView();
+  updatePostView(highlightedPostIndex);
+});
+
+// add a comment from the post-view
+$postView.on('click', 'button', function() {
+  var $commentContentInput = $(this).siblings('.comment-content');
+  var $commentAuthorInput = $(this).siblings('.comment-author');
+
+  data.posts[highlightedPostIndex].comments.push({
+    content: $commentContentInput.val(),
+    author: $commentAuthorInput.val()
+  });
+
+  $commentContentInput.val('');
+  $commentAuthorInput.val('');
+
+  updatePostsView();
+  updatePostView(highlightedPostIndex);
+});
+
+$('.back-to-posts').click(function() {
+  toggleViews();
+});
+
+$(document).ready(function() {
+  data = getFromLocalStorage();
+  updatePostsView();
 });

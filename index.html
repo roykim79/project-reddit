@@ -20,75 +20,103 @@
       </div>
     </div>
 
-    <!-- new posts will be appended to posts div -->
-    <div class="row posts">
-
-      <!-- TEST CONTENT -->
-      <!-- <div class="row post">
+    <!-- BEGIN posts-view -->
+    <div class="posts-view">
+      <!-- new posts will be appended to posts div -->
+      <div class="posts"></div>
+      <!-- New post inputs -->
+      <div class="row new-post">
         <div class="col-md-12">
-          <p class="post-content">Here is a cool post about nothing</p>
-          <div class="post-details">
-            <span class="post-author">Posted By: <strong>John Doe</strong></span>
-            <span class="remove-post"><a href="#">remove</a></span>
-            <span class="edit-post"><a href="#">edit</a></span>
-            <span class="toggle-post-comments"><a href="#">comments</a></span>
-          </div>
-          <div class="edit-area">
-            <form action="#">
-              <input class="form-control edit-content" type="text">
-              <button class="btn btn-primary">Update</button>
-            </form>
-          </div>
-
-
-          <div class="comments">
-            <div class="post-comments">
-              <div class="post-comment">
-                <span class="post-comment-content">This is so cool</span>
-                <span class="post-comment-author"> - <strong>Jane Doe</strong></span>
-                <span class="glyphicon glyphicon-remove"></span>
-              </div>
-              <div class="post-comment">
-                <span class="post-comment-content">This is so cool</span>
-                <span class="post-comment-author"> - <strong>Jane Doe</strong></span>
-                <span class="glyphicon glyphicon-remove"></span>
-              </div>
-              <div class="post-comment">
-                <span class="post-comment-content">This is so cool</span>
-                <span class="post-comment-author"> - <strong>Jane Doe</strong></span>
-                <span class="glyphicon glyphicon-remove"></span>
-              </div>
-            </div>
-
-            <div class="add-comment">
-              <form action="#">
-                <input class="form-control comment-content" type="text" placeholder="Comment Text">
-                <input class="form-control comment-author" type="text" placeholder="Name">
-                <button class="btn btn-primary">Post Comment</button>
-              </form>
-            </div>
-          </div>
+          <h2>Add a New Post</h2>
+          <form action="#">
+            <input id="new-post-content" class="form-control" type="text" placeholder="Post Text">
+            <input id="new-post-author" class="form-control" type="text" placeholder="Name">
+            <button id="new-post-post" class="btn btn-primary" type="button">Post</button>
+          </form>
         </div>
-      </div> -->
-
-      <!-- END TEST CONTENT -->
-
-    </div>
-
-    <!-- New post inputs -->
-    <div class="row new-post">
-      <div class="col-md-12">
-        <h2>Add a New Post</h2>
-        <form action="#">
-          <input id="new-post-content" class="form-control" type="text" placeholder="Post Text">
-          <input id="new-post-author" class="form-control" type="text" placeholder="Name">
-          <button id="new-post-post" class="btn btn-primary" type="button">Post</button>
-        </form>
       </div>
     </div>
+    <!-- END posts-view -->
+
+    <!-- BEGIN post-view -->
+    <div class="post-view hide">
+      <a class="back-to-posts" href="#">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        Back
+      </a>
+      <div class="post-content">Content</div>
+      <div>Posted By: <strong class="post-author">John Doe</strong></div>
+      <div class="comments">
+        <div class="post-comments">
+        </div>
+        <div class="add-comment">
+          <form action="#">
+            <input class="form-control comment-content" type="text" placeholder="Comment Text">
+            <input class="form-control comment-author" type="text" placeholder="Name">
+            <button class="btn btn-primary">Post Comment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- END post-view -->
+
   </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.js"></script>
+
+  <!-- BEGIN post-template -->
+  <script id="post-template" type="text/x-handlebars-template">
+    {{#each posts}}
+    <div class="row post" data-post-index={{@index}}>
+      <div class="col-md-12">
+        <p class="post-content">{{ content }}</p>
+        <div class="post-details">
+          <span class="post-author">Posted By: <strong>{{ author }}</strong></span>
+          <span class="remove-post"><a href="#">remove</a></span>
+          <span class="edit-post"><a href="#">edit</a></span>
+          <span class="toggle-post-comments"><a href="#">comments</a></span>
+        </div>
+        <div class="edit-area hide">
+          <form action="#">
+            <input class="form-control edit-content" type="text" value="{{content}}">
+            <button class="btn btn-primary">Update</button>
+          </form>
+        </div>
+        <div class="comments hide">
+          <div class="post-comments">
+            {{#each comments}}
+            <div class="post-comment" data-comment-index={{@index}}>
+              <span class="post-comment-content">{{ this.content }}</span>
+              <span class="post-comment-author"> - <strong>{{ this.author }}</strong></span>
+              <span class="glyphicon glyphicon-remove"></span>
+            </div>
+            {{/each}}
+          </div>
+          <div class="add-comment">
+            <form action="#">
+              <input class="form-control comment-content" type="text" placeholder="Comment Text">
+              <input class="form-control comment-author" type="text" placeholder="Name">
+              <button class="btn btn-primary">Post Comment</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </script>
+  <!-- END post-template -->
+
+  <script id="comments-template" type="text/x-handlebars-template">
+    {{#each comments}}
+    <div class="post-comment" data-comment-index={{@index}}>
+      <span class="post-comment-content">{{ this.content }}</span>
+      <span class="post-comment-author"> - <strong>{{ this.author }}</strong></span>
+      <span class="glyphicon glyphicon-remove"></span>
+    </div>
+    {{/each}}
+  </script>
+
   <script type="text/javascript" src="main.js">
   </script>
 </body>
